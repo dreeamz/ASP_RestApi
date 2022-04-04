@@ -1,4 +1,6 @@
+using ASP_RestAPI.Dtos;
 using ASP_RestAPI.Repositories;
+using ASP_RestAPI.Tools;
 using Microsoft.AspNetCore.Mvc;
 
 namespace ASP_RestAPI
@@ -15,16 +17,16 @@ namespace ASP_RestAPI
 
         //Get / items
         [HttpGet]
-        public IEnumerable<Item> GetItems()
+        public IEnumerable<ItemDto> GetItems()
         {
-            return repository.GetItems();           
+            return repository.GetItems().Select<Item,ItemDto>(item =>item.AsDto());
         }
-
+        
         //Get /items/id
         [HttpGet("{id}")]
-        public ActionResult<Item> GetItem(Guid id)
+        public ActionResult<ItemDto> GetItem(Guid id)
         {
-            var item = repository.GetItem(id);
+            var item = repository.GetItem(id).AsDto();
             
             if(item is null)
                 return NotFound();
