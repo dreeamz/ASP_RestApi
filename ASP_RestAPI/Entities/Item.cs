@@ -1,4 +1,4 @@
-namespace ASP_RestAPI
+namespace ASP_RestAPI.Entities
 {
     public record Item
     {

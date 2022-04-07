@@ -1,16 +1,11 @@
-using System.Linq;
+using ASP_RestAPI.Entities;
 
 namespace ASP_RestAPI.Repositories
 {
 
     public class InMemItemsRepository : IItemsRepository
     {
-        private readonly List<Item> items = new()
-        {
-            new Item { Id = Guid.NewGuid(),Name = "Potion",Price = 9 , CreatedDate = DateTimeOffset.UtcNow },
-            new Item { Id = Guid.NewGuid(),Name = "Iron Sword",Price = 20 , CreatedDate = DateTimeOffset.UtcNow },
-            new Item { Id = Guid.NewGuid(),Name = "Bronze Shield",Price = 18 , CreatedDate = DateTimeOffset.UtcNow }
-        };
+        private readonly List<Item> items = new();
 
         public IEnumerable<Item> GetItems()
         {

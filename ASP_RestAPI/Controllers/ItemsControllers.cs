@@ -1,4 +1,5 @@
 using ASP_RestAPI.Dtos;
+using ASP_RestAPI.Entities;
 using ASP_RestAPI.Repositories;
 using ASP_RestAPI.Tools;
 using Microsoft.AspNetCore.Mvc;

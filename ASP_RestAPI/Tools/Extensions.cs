@@ -1,4 +1,5 @@
 using ASP_RestAPI.Dtos;
+using ASP_RestAPI.Entities;
 
 namespace ASP_RestAPI.Tools
 {

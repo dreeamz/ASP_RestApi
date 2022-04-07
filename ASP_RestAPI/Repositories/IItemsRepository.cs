@@ -1,3 +1,5 @@
+using ASP_RestAPI.Entities;
+
 namespace ASP_RestAPI.Repositories
 {
     public interface IItemsRepository
