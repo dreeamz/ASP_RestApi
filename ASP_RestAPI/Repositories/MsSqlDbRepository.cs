@@ -7,6 +7,7 @@ namespace ASP_RestAPI.Repositories
     public class MsSqlDbRepository : IItemsRepository
     {
 
+
         private readonly string connectionString =
         System.Configuration.ConfigurationManager.ConnectionStrings["MyConnectionString"].ConnectionString;
 
@@ -39,7 +40,7 @@ namespace ASP_RestAPI.Repositories
                     switch (i)
                     {
                         case 0:
-                            ItemGuid = Guid.Parse(reader[i].ToString());
+                            ItemGuid = Guid.Parse($"{reader[i]}");
                             break;
                         case 1:
                             ItemName = (string)reader[i];
@@ -48,7 +49,7 @@ namespace ASP_RestAPI.Repositories
                             ItemPrice = (decimal)reader[i];
                             break;
                         case 3:
-                            ItemCreatedDate = (DateTimeOffset)reader[i];
+                            ItemCreatedDate = DateTimeOffset.Parse($"{reader[i]}");
                             break;
                     }
                 }
@@ -61,6 +62,8 @@ namespace ASP_RestAPI.Repositories
                     CreatedDate = ItemCreatedDate
                 };
 
+
+
                 yield return item;
             };
             connection.Close();
@@ -68,17 +71,17 @@ namespace ASP_RestAPI.Repositories
 
 
 
-        public async void CreateItem(Item item)
+        public async Task CreateItemAsync(Item item)
         {
             if (connection.State != ConnectionState.Open)
                 connection.Open();
             command.Connection = connection;
             command.CommandText = @$"Insert into Items Values('{item.Id}','{item.Name}',{item.Price},'{item.CreatedDate}')";
             await command.ExecuteNonQueryAsync();
-            connection.Close();
+            await connection.CloseAsync();
         }
 
-        public async void DeleteItem(Guid id)
+        public async Task DeleteItemAsync(Guid id)
         {
 
             if (connection.State != ConnectionState.Open)
@@ -87,17 +90,17 @@ namespace ASP_RestAPI.Repositories
 
             command.CommandText = @$"DELETE FROM Items WHERE ID ='{id}'";
             await command.ExecuteNonQueryAsync();
-            connection.Close();
+            await connection.CloseAsync();
         }
 
-        public Item GetItem(Guid id)
+        public async Task<Item> GetItemAsync(Guid id)
         {
             if (connection.State != ConnectionState.Open)
                 connection.Open();
             command.Connection = connection;
 
             command.CommandText = @$"Select * FROM Items WHERE ID ='{id}'";
-            reader = command.ExecuteReader();
+            reader = await command.ExecuteReaderAsync();
 
             if (reader.Read())
             {
@@ -108,14 +111,14 @@ namespace ASP_RestAPI.Repositories
                     Price = (decimal)reader[2],
                     CreatedDate = (DateTimeOffset)reader[3]
                 };
-                connection.Close();
+                await connection.CloseAsync();
                 return item;
             }
-            connection.Close();
+            await connection.CloseAsync();
             return null;
         }
 
-        public async void UpdateItem(Item item)
+        public async Task UpdateItemAsync(Item item)
         {
             if (connection.State != ConnectionState.Open)
                 connection.Open();
@@ -123,7 +126,8 @@ namespace ASP_RestAPI.Repositories
 
             command.CommandText = @$"UPDATE Items SET Name = '{item.Name}', Price = {item.Price} WHERE ID = '{item.Id}'";
             await command.ExecuteNonQueryAsync();
-            connection.Close();
+            await connection.CloseAsync();
         }
+
     }
 }

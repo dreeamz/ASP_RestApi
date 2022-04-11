@@ -4,10 +4,10 @@ namespace ASP_RestAPI.Repositories
 {
     public interface IItemsRepository
     {
-        Item GetItem(Guid id);
+        Task<Item> GetItemAsync(Guid id);
         IEnumerable<Item> GetItems();
-        void CreateItem(Item item);
-        void UpdateItem(Item item);
-        void DeleteItem(Guid id);
+        Task CreateItemAsync(Item item);
+        Task UpdateItemAsync(Item item);
+        Task DeleteItemAsync(Guid id);
     }
 }

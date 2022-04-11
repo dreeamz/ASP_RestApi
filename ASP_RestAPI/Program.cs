@@ -1,13 +1,29 @@
+using System.Net.Mime;
+using System.Text.Json;
 using ASP_RestAPI.Repositories;
+using Microsoft.AspNetCore.Diagnostics.HealthChecks;
+
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
+builder.Services.AddSingleton<IItemsRepository, MsSqlDbRepository>();
+builder.Services.AddControllers(options =>
+{
+    options.SuppressAsyncSuffixInActionNames = false;
+});
 
-builder.Services.AddSingleton<IItemsRepository,MsSqlDbRepository>();
-builder.Services.AddControllers();
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
+builder.Services.AddHealthChecks()
+.AddSqlServer(
+        System.Configuration.ConfigurationManager.ConnectionStrings["MyConnectionString"].ConnectionString,
+        name: "MsSql",
+        timeout: TimeSpan.FromSeconds(3),
+        tags: new[] { "ready" }
+);
+
 builder.Services.AddEndpointsApiExplorer();
+
+// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
@@ -18,6 +34,34 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
+app.UseRouting();
+app.UseEndpoints(endpoints =>
+{
+    endpoints.MapHealthChecks("/health/ready", new HealthCheckOptions
+    {
+        Predicate = (check) => check.Tags.Contains("ready"),
+        ResponseWriter = async (context, report) =>
+        {
+            var result = JsonSerializer.Serialize(new
+            {
+                status = report.Status.ToString(),
+                cheks = report.Entries.Select(entry => new
+                {
+                    name = entry.Key,
+                    status = entry.Value.Status.ToString(),
+                    exception = entry.Value.Exception != null ? entry.Value.Exception.Message : "none",
+                    duration = entry.Value.Duration.ToString()
+                })
+            });
+            context.Response.ContentType = MediaTypeNames.Application.Json;
+            await context.Response.WriteAsync(result);
+        }
+    });
+    endpoints.MapHealthChecks("/health/live", new HealthCheckOptions
+    {
+        Predicate = (_) => false
+    });
+});
 
 app.UseHttpsRedirection();
 
@@ -157,7 +201,7 @@ app.Run();
 //     {
 //         if (connection != null)
 //             connection.Close();
-//         if (reader != null)
+//         if (reader != null) 
 //             reader.Close();
 //     }
 // }
